@@ -7,23 +7,25 @@ func TestFindShortestPaths(t *testing.T) {
 
 	a := g.NewVertex("a")
 	b := g.NewVertex("b")
-	a.AddEdge(b, int64(1))
-	b.AddEdge(a, int64(1))
-
 	c := g.NewVertex("c")
-	a.AddEdge(c, int64(2))
-	c.AddEdge(a, int64(1))
-	b.AddEdge(c, int64(3))
-	c.AddEdge(b, int64(3))
-
 	d := g.NewVertex("d")
+
+	a.AddEdge(b, int64(1))
+	a.AddEdge(c, int64(2))
+
+	b.AddEdge(a, int64(1))
+	b.AddEdge(c, int64(3))
 	b.AddEdge(d, int64(1))
-	c.AddEdge(d, int64(2))
+
+	c.AddEdge(a, int64(1))
+	c.AddEdge(b, int64(3))
+	c.AddEdge(d, int64(3))
+
 	d.AddEdge(b, int64(1))
 	d.AddEdge(c, int64(1))
 
 	// Find the shortest paths to vertex a
-	pm := FindShortestPaths(g, a)
+	pm := g.FindShortestPaths(a)
 
 	// Check that the PathInfo for d is valid
 	pathToD := pm[d]
@@ -39,22 +41,22 @@ func TestFindShortestPaths(t *testing.T) {
 	pi := pm[vlist[0]]
 	for i, v := range vlist {
 		if pi == nil {
-			t.Fatalf("PathInfo for vertex %s on shortest path is nil\n", v.Value.(string))
+			t.Fatalf("Path for vertex %s on shortest path is nil\n", v.Value.(string))
 		}
 		if pi.vertex != v {
-			t.Fatalf("PathInfo for vertex %s does not map to correct vertex\n", v.Value.(string))
+			t.Fatalf("Path for vertex %s does not map to correct vertex\n", v.Value.(string))
 		}
 		// Check source vertex's
 		if i == len(vlist)-1 {
 			if pi.prev != nil {
-				t.Errorf("PathInfo of source vertex does not end chain\n")
+				t.Errorf("Path of source vertex does not end chain\n")
 			}
 			if pi.dist != 0 {
-				t.Errorf("PathInfo of source vertex does not have distance 0 (actual %d)\n", pi.dist)
+				t.Errorf("Path of source vertex does not have distance 0 (actual %d)\n", pi.dist)
 			}
 		} else {
 			if pi.prev == nil {
-				t.Errorf("PathInfo for vertex %s does not link to previous vertex\n", v.Value.(string))
+				t.Errorf("Path for vertex %s does not link to previous vertex\n", v.Value.(string))
 			}
 			pi = pi.prev
 		}
