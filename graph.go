@@ -42,7 +42,8 @@ func (g *Graph) NewVertex(value interface{}) *Vertex {
 
 // AddEdge adds a directed connection from a node to a destination node.
 // If the node is already connected to the other node, the cost is
-// updated.
+// updated. Note that FindShortestPaths expects all Costs to be of type
+// int64.
 func (v *Vertex) AddEdge(dst *Vertex, c Cost) {
 	if dst == nil {
 		panic("edge destination is nil")
@@ -63,24 +64,38 @@ func (v *Vertex) AddEdge(dst *Vertex, c Cost) {
 	return
 }
 
-// RemoveEdge removes the connection from this node to the destination node.
-func (v *Vertex) RemoveEdge(dst *Vertex) {
+// FindCost returns the cost from one vertex to another. If there is no edge
+// to the destination vertex, FindCost returns nil.
+func (v *Vertex) FindCost(dst *Vertex) Cost {
 	e := v.out[dst]
 	if e == nil {
-		return
+		return nil
+	}
+
+	return e.cost
+}
+
+// RemoveEdge removes the connection from this node to the destination node.
+// Returns the cost of the edge that is removed. If the edge did not exist,
+// RemoveEdge returns nil.
+func (v *Vertex) RemoveEdge(dst *Vertex) Cost {
+	e := v.out[dst]
+	if e == nil {
+		return nil
 	}
 
 	delete(e.src.out, e.dst)
 	delete(e.dst.in, e.src)
+	return e.cost
 }
 
-// RemoveNode removes a node from the graph. It removes all edges associated
-// with the node in the process.
-func (g *Graph) RemoveNode(v *Vertex) {
-	// Remove edges to this node from all sources.
+// RemoveVertex removes a vertex from the graph. It removes all edges associated
+// with the vertex in the process.
+func (g *Graph) RemoveVertex(v *Vertex) {
+	// Remove edges to this vertex from all sources.
 	for src := range v.in {
 		delete(src.out, v)
 	}
-	// Delete the node from graph's map of nodes.
+	// Delete the node from graph's map of vertexes.
 	delete(g.vertex, v)
 }
